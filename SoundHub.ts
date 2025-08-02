@@ -168,6 +168,7 @@ class SoundHub
         '.lil-gui{ border:1px solid darkred; padding:0.2em; background-color:#111111; overflow:hidden; }',
         '.lil-gui{ color:white; }',
         '.lil-gui.closed{ width:5em }',
-        '.lil-gui button{ width:100%; padding:0.1em; background-color:black; color: lightgray; }'
+        '.lil-gui button{ width:100%; padding:0.1em; background-color:darkgray; color:lightgray; }',
+        '.lil-gui button.disabled{ color:black; color:darkgray; }'
     ];
 }

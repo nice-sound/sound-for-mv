@@ -16,16 +16,18 @@ var SoundSender = /** @class */ (function () {
     SoundSender.stop = function () {
         this.sendCommand(null);
     };
-    SoundSender.isCommand = function (command) {
-        return command.substring(0, this.commandPrefix.length) == this.commandPrefix;
+    SoundSender.isCommand = function (commandStr) {
+        return commandStr.substring(0, this.commandPrefix.length) == this.commandPrefix;
     };
-    SoundSender.getCommandText = function (command) {
-        return command.indexOf(this.commandPrefix) == 0 ? command.substring(this.commandPrefix.length) : command;
+    SoundSender.getCommandText = function (commandStr) {
+        return commandStr.indexOf(this.commandPrefix) == 0 ? commandStr.substring(this.commandPrefix.length) : commandStr;
     };
     SoundSender.sendCommand = function (command) {
         if (this.sender != null)
-            if (command != null)
-                this.sender(this.commandPrefix + command);
+            if (command != null) {
+                var commandStr = this.valueToString(command);
+                this.sender(this.commandPrefix + commandStr);
+            }
             else
                 this.sender(this.commandPrefix);
         else
@@ -98,10 +100,10 @@ var SoundSender = /** @class */ (function () {
     };
     SoundSender.commandPrefix = 'BZZZT';
     SoundSender.sender = null;
-    //private static sepChar = '\u00ad';
-    SoundSender.sepChar = ',';
-    //private static encChars = [ '\u200b', '\u200c', '\u200d', '\ufeff' ];
-    SoundSender.encChars = ['a', 'b', 'c', 'd'];
+    SoundSender.sepChar = '\u00ad';
+    //private static sepChar = ',';
+    SoundSender.encChars = ['\u200b', '\u200c', '\u200d', '\ufeff'];
+    //private static encChars = [ 'a', 'b', 'c', 'd' ];
     SoundSender.beginObjectChar = '{';
     SoundSender.endObjectChar = '}';
     SoundSender.beginArrayChar = '[';

@@ -23,21 +23,24 @@ class SoundSender
 		this.sendCommand( null );
 	}
 
-	public static isCommand( command: string ): boolean
+	public static isCommand( commandStr: string ): boolean
 	{
-		return command.substring( 0, this.commandPrefix.length ) == this.commandPrefix;
+		return commandStr.substring( 0, this.commandPrefix.length ) == this.commandPrefix;
 	}
 
-	public static getCommandText( command: string ): string
+	public static getCommandText( commandStr: string ): string
 	{
-		return command.indexOf( this.commandPrefix ) == 0 ? command.substring( this.commandPrefix.length ) : command;
+		return commandStr.indexOf( this.commandPrefix ) == 0 ? commandStr.substring( this.commandPrefix.length ) : commandStr;
 	}
 
 	private static sendCommand( command: object | null )
 	{
 		if ( this.sender != null )
 			if ( command != null )
-				this.sender( this.commandPrefix + command );
+			{
+				var commandStr = this.valueToString( command );
+				this.sender( this.commandPrefix + commandStr );
+			}
 			else
 				this.sender( this.commandPrefix );
 		else
@@ -129,10 +132,10 @@ class SoundSender
 
 	private static commandPrefix = 'BZZZT';
 	private static sender: ( ( string ) => void ) | null = null;
-	//private static sepChar = '\u00ad';
-	private static sepChar = ',';
-	//private static encChars = [ '\u200b', '\u200c', '\u200d', '\ufeff' ];
-	private static encChars = [ 'a', 'b', 'c', 'd' ];
+	private static sepChar = '\u00ad';
+	//private static sepChar = ',';
+	private static encChars = [ '\u200b', '\u200c', '\u200d', '\ufeff' ];
+	//private static encChars = [ 'a', 'b', 'c', 'd' ];
 	private static beginObjectChar = '{';
 	private static endObjectChar = '}';
 	private static beginArrayChar = '[';
