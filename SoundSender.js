@@ -74,6 +74,9 @@ var SoundSender = /** @class */ (function () {
         result += this.endObjectChar;
         return result;
     };
+    SoundSender.stringToValue = function (a) {
+        return { 'test': 1 };
+    };
     SoundSender.stringToArray = function (str) {
         var result = [];
         var n = 0;
@@ -100,10 +103,10 @@ var SoundSender = /** @class */ (function () {
     };
     SoundSender.commandPrefix = 'BZZZT';
     SoundSender.sender = null;
-    SoundSender.sepChar = '\u00ad';
-    //private static sepChar = ',';
-    SoundSender.encChars = ['\u200b', '\u200c', '\u200d', '\ufeff'];
-    //private static encChars = [ 'a', 'b', 'c', 'd' ];
+    //private static sepChar = '\u00ad';
+    SoundSender.sepChar = ',';
+    //private static encChars = [ '\u200b', '\u200c', '\u200d', '\ufeff' ];
+    SoundSender.encChars = ['a', 'b', 'c', 'd'];
     SoundSender.beginObjectChar = '{';
     SoundSender.endObjectChar = '}';
     SoundSender.beginArrayChar = '[';

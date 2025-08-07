@@ -100,6 +100,11 @@ class SoundSender
 		return result;
 	}
 
+	private static stringToValue( a ): object
+	{
+		return { 'test': 1 };
+	}
+
 	private static stringToArray( str: string ): number[] | null
 	{
 		var result: number[] = [];
@@ -132,10 +137,10 @@ class SoundSender
 
 	private static commandPrefix = 'BZZZT';
 	private static sender: ( ( string ) => void ) | null = null;
-	private static sepChar = '\u00ad';
-	//private static sepChar = ',';
-	private static encChars = [ '\u200b', '\u200c', '\u200d', '\ufeff' ];
-	//private static encChars = [ 'a', 'b', 'c', 'd' ];
+	//private static sepChar = '\u00ad';
+	private static sepChar = ',';
+	//private static encChars = [ '\u200b', '\u200c', '\u200d', '\ufeff' ];
+	private static encChars = [ 'a', 'b', 'c', 'd' ];
 	private static beginObjectChar = '{';
 	private static endObjectChar = '}';
 	private static beginArrayChar = '[';

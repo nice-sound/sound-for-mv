@@ -1,0 +1,39 @@
+<html>
+<meta charset="UTF-8">
+<script src="SoundSender.js"></script>
+</head>
+
+<body>
+	<div>
+		<label for="inputValue">JSON:</label>
+		<input id="inputValue" type="text">
+	</div>
+	<button onclick=" encode()">Encode</button>
+	<div>
+		<label for="outputValue">String:</label>
+		<input id="outputValue" type="text">
+	</div>
+	<button onclick=" decode()">Decode</button>
+	<div>
+		<label for="outputValue2">JSON:</label>
+		<input id="outputValue2" type="text">
+	</div>
+
+	<script>
+		function encode()
+		{
+			let value = document.getElementById( 'inputValue' ).value;
+			value = JSON.parse( value );
+			let result = SoundSender.valueToString( value );
+			document.getElementById( 'outputValue' ).value = result;
+		}
+		function decode()
+		{
+			let value = document.getElementById( 'outputValue' ).value;
+			let result = SoundSender.stringToValue( value );
+			document.getElementById( 'outputValue2' ).value = JSON.stringify( result );
+		}
+	</script>
+</body>
+
+</html>
