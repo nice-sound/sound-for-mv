@@ -22,15 +22,15 @@
 	<script>
 		function encode()
 		{
-			let value = document.getElementById( 'inputValue' ).value;
+			var value = document.getElementById( 'inputValue' ).value;
 			value = JSON.parse( value );
-			let result = SoundSender.valueToString( value );
+			var result = SoundSender.valueToString( value );
 			document.getElementById( 'outputValue' ).value = result;
 		}
 		function decode()
 		{
-			let value = document.getElementById( 'outputValue' ).value;
-			let result = SoundSender.stringToValue( value );
+			var value = document.getElementById( 'outputValue' ).value;
+			var result = SoundSender.stringToValue( value );
 			document.getElementById( 'outputValue2' ).value = JSON.stringify( result );
 		}
 	</script>

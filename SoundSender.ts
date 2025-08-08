@@ -100,9 +100,34 @@ class SoundSender
 		return result;
 	}
 
-	private static stringToValue( a ): object
+	private static stringToValue( str: string ): object
 	{
-		return { 'test': 1 };
+		var result = {};
+		for ( var i = 0; i < str.length; i++ )
+		{
+			var c = str.charAt( i );
+			if ( c == this.beginObjectChar )
+			{
+			}
+			else if ( c == this.beginArrayChar )
+			{
+			}
+			else if ( c == this.endObjectChar || c == this.endArrayChar || c == this.sepChar )
+			{
+			}
+			else
+			{
+				var j = this.findNumberEnd( str, i );
+				var keyAsNumber = this.substringToNumber( str, i, j );
+				var key = keyAsNumber.toString( 36 );
+				j++;
+				var j2 = this.findNumberEnd( str, j );
+				var value = this.substringToNumber( str, j, j2 );
+				result[ key ] = value;
+				i = j2;
+			}
+		}
+		return result;
 	}
 
 	private static stringToArray( str: string ): number[] | null
@@ -133,6 +158,38 @@ class SoundSender
 			}
 		}
 		return result;
+	}
+
+	private static findNumberEnd( str: string, i: number )
+	{
+		while ( i < str.length && this.encChars.indexOf( str.charAt( i ) ) > -1 )
+			i++;
+		return i;
+	}
+
+	private static substringToNumber( str: string, i: number, j: number )
+	{
+		var sub = str.substring( i, j );
+		return this.stringToNumber( sub );
+	}
+
+	private static stringToNumber( str: string )
+	{
+		var n = 0;
+		var j = 0;
+		for ( var i = 0; i < str.length; i++ )
+		{
+			var c = str.charAt( i );
+			var b = this.encChars.indexOf( c );
+			if ( b >= 0 && b <= 3 )
+			{
+				n = n | ( b << ( j * 2 ) );
+				j++;
+			}
+			else
+				return null;
+		}
+		return n;
 	}
 
 	private static commandPrefix = 'BZZZT';

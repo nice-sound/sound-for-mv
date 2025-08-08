@@ -74,8 +74,28 @@ var SoundSender = /** @class */ (function () {
         result += this.endObjectChar;
         return result;
     };
-    SoundSender.stringToValue = function (a) {
-        return { 'test': 1 };
+    SoundSender.stringToValue = function (str) {
+        var result = {};
+        for (var i = 0; i < str.length; i++) {
+            var c = str.charAt(i);
+            if (c == this.beginObjectChar) {
+            }
+            else if (c == this.beginArrayChar) {
+            }
+            else if (c == this.endObjectChar || c == this.endArrayChar || c == this.sepChar) {
+            }
+            else {
+                var j = this.findNumberEnd(str, i);
+                var keyAsNumber = this.substringToNumber(str, i, j);
+                var key = keyAsNumber.toString(36);
+                j++;
+                var j2 = this.findNumberEnd(str, j);
+                var value = this.substringToNumber(str, j, j2);
+                result[key] = value;
+                i = j2;
+            }
+        }
+        return result;
     };
     SoundSender.stringToArray = function (str) {
         var result = [];
@@ -100,6 +120,30 @@ var SoundSender = /** @class */ (function () {
             }
         }
         return result;
+    };
+    SoundSender.findNumberEnd = function (str, i) {
+        while (i < str.length && this.encChars.indexOf(str.charAt(i)) > -1)
+            i++;
+        return i;
+    };
+    SoundSender.substringToNumber = function (str, i, j) {
+        var sub = str.substring(i, j);
+        return this.stringToNumber(sub);
+    };
+    SoundSender.stringToNumber = function (str) {
+        var n = 0;
+        var j = 0;
+        for (var i = 0; i < str.length; i++) {
+            var c = str.charAt(i);
+            var b = this.encChars.indexOf(c);
+            if (b >= 0 && b <= 3) {
+                n = n | (b << (j * 2));
+                j++;
+            }
+            else
+                return null;
+        }
+        return n;
     };
     SoundSender.commandPrefix = 'BZZZT';
     SoundSender.sender = null;
