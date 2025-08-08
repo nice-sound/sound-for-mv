@@ -74,9 +74,9 @@ class SoundSender
 	private static numberToString( value: number ): string
 	{
 		var result = "";
-		var tmp = Math.floor( value ).toString( 4 );
-		for ( var i = 0; i < tmp.length; i++ )
-			result += this.encChars[ tmp.charCodeAt( i ) - this.zeroCc ];
+		var str = Math.floor( value ).toString( this.encChars.length );
+		for ( var i = str.length - 1; i >= 0; i-- )
+			result += this.encChars[ str.charCodeAt( i ) - this.zeroCc ];
 		return result;
 	}
 
@@ -117,47 +117,22 @@ class SoundSender
 			}
 			else
 			{
-				var j = this.findNumberEnd( str, i );
-				var keyAsNumber = this.substringToNumber( str, i, j );
-				var key = keyAsNumber.toString( 36 );
-				j++;
-				var j2 = this.findNumberEnd( str, j );
-				var value = this.substringToNumber( str, j, j2 );
-				result[ key ] = value;
-				i = j2;
+				i = this.stringToKeyValue( str, i, result );
 			}
 		}
 		return result;
 	}
 
-	private static stringToArray( str: string ): number[] | null
+	private static stringToKeyValue( str: string, i: number, out: object ): number
 	{
-		var result: number[] = [];
-		var n = 0;
-		var j = 0;
-		for ( var i = 0; i < str.length; i++ )
-		{
-			var c = str.charAt( i );
-			if ( c != this.sepChar )
-			{
-				var b = this.encChars.indexOf( c );
-				if ( b >= 0 && b <= 3 )
-				{
-					n = n | ( b << ( j * 2 ) );
-					j++;
-				}
-				else
-					return null;
-			}
-			if ( c == this.sepChar || i == str.length - 1 )
-			{
-				if ( j > 0 )
-					result.push( n );
-				n = 0;
-				j = 0;
-			}
-		}
-		return result;
+		var j = this.findNumberEnd( str, i );
+		var keyAsNumber = this.substringToNumber( str, i, j );
+		var key = keyAsNumber.toString( 36 );
+		j++;
+		var j2 = this.findNumberEnd( str, j );
+		var value = this.substringToNumber( str, j, j2 );
+		out[ key ] = value;
+		return j2;
 	}
 
 	private static findNumberEnd( str: string, i: number )
@@ -175,21 +150,17 @@ class SoundSender
 
 	private static stringToNumber( str: string )
 	{
-		var n = 0;
-		var j = 0;
-		for ( var i = 0; i < str.length; i++ )
+		var tmp = "";
+		for ( var i = str.length - 1; i >= 0; i-- )
 		{
 			var c = str.charAt( i );
 			var b = this.encChars.indexOf( c );
 			if ( b >= 0 && b <= 3 )
-			{
-				n = n | ( b << ( j * 2 ) );
-				j++;
-			}
+				tmp += String.fromCharCode( b + this.zeroCc );
 			else
 				return null;
 		}
-		return n;
+		return parseInt( tmp, this.encChars.length );
 	}
 
 	private static commandPrefix = 'BZZZT';
@@ -202,5 +173,5 @@ class SoundSender
 	private static endObjectChar = '}';
 	private static beginArrayChar = '[';
 	private static endArrayChar = ']';
-	private static zeroCc = "0".charCodeAt( 0 );
+	private static zeroCc = '0'.charCodeAt( 0 );
 }

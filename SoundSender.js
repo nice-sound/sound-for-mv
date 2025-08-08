@@ -54,9 +54,9 @@ var SoundSender = /** @class */ (function () {
     };
     SoundSender.numberToString = function (value) {
         var result = "";
-        var tmp = Math.floor(value).toString(4);
-        for (var i = 0; i < tmp.length; i++)
-            result += this.encChars[tmp.charCodeAt(i) - this.zeroCc];
+        var str = Math.floor(value).toString(this.encChars.length);
+        for (var i = str.length - 1; i >= 0; i--)
+            result += this.encChars[str.charCodeAt(i) - this.zeroCc];
         return result;
     };
     SoundSender.objectToString = function (object) {
@@ -85,41 +85,20 @@ var SoundSender = /** @class */ (function () {
             else if (c == this.endObjectChar || c == this.endArrayChar || c == this.sepChar) {
             }
             else {
-                var j = this.findNumberEnd(str, i);
-                var keyAsNumber = this.substringToNumber(str, i, j);
-                var key = keyAsNumber.toString(36);
-                j++;
-                var j2 = this.findNumberEnd(str, j);
-                var value = this.substringToNumber(str, j, j2);
-                result[key] = value;
-                i = j2;
+                i = this.stringToKeyValue(str, i, result);
             }
         }
         return result;
     };
-    SoundSender.stringToArray = function (str) {
-        var result = [];
-        var n = 0;
-        var j = 0;
-        for (var i = 0; i < str.length; i++) {
-            var c = str.charAt(i);
-            if (c != this.sepChar) {
-                var b = this.encChars.indexOf(c);
-                if (b >= 0 && b <= 3) {
-                    n = n | (b << (j * 2));
-                    j++;
-                }
-                else
-                    return null;
-            }
-            if (c == this.sepChar || i == str.length - 1) {
-                if (j > 0)
-                    result.push(n);
-                n = 0;
-                j = 0;
-            }
-        }
-        return result;
+    SoundSender.stringToKeyValue = function (str, i, out) {
+        var j = this.findNumberEnd(str, i);
+        var keyAsNumber = this.substringToNumber(str, i, j);
+        var key = keyAsNumber.toString(36);
+        j++;
+        var j2 = this.findNumberEnd(str, j);
+        var value = this.substringToNumber(str, j, j2);
+        out[key] = value;
+        return j2;
     };
     SoundSender.findNumberEnd = function (str, i) {
         while (i < str.length && this.encChars.indexOf(str.charAt(i)) > -1)
@@ -131,19 +110,16 @@ var SoundSender = /** @class */ (function () {
         return this.stringToNumber(sub);
     };
     SoundSender.stringToNumber = function (str) {
-        var n = 0;
-        var j = 0;
-        for (var i = 0; i < str.length; i++) {
+        var tmp = "";
+        for (var i = str.length - 1; i >= 0; i--) {
             var c = str.charAt(i);
             var b = this.encChars.indexOf(c);
-            if (b >= 0 && b <= 3) {
-                n = n | (b << (j * 2));
-                j++;
-            }
+            if (b >= 0 && b <= 3)
+                tmp += String.fromCharCode(b + this.zeroCc);
             else
                 return null;
         }
-        return n;
+        return parseInt(tmp, this.encChars.length);
     };
     SoundSender.commandPrefix = 'BZZZT';
     SoundSender.sender = null;
@@ -155,6 +131,6 @@ var SoundSender = /** @class */ (function () {
     SoundSender.endObjectChar = '}';
     SoundSender.beginArrayChar = '[';
     SoundSender.endArrayChar = ']';
-    SoundSender.zeroCc = "0".charCodeAt(0);
+    SoundSender.zeroCc = '0'.charCodeAt(0);
     return SoundSender;
 }());

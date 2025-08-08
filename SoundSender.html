@@ -6,32 +6,34 @@
 <body>
 	<div>
 		<label for="inputValue">JSON:</label>
-		<input id="inputValue" type="text">
+		<input id="inputValue" type="text" size=100 oninput="encode()">
 	</div>
-	<button onclick=" encode()">Encode</button>
 	<div>
 		<label for="outputValue">String:</label>
-		<input id="outputValue" type="text">
+		<input id="outputValue" type="text" size=100 oninput="decode()">
 	</div>
-	<button onclick=" decode()">Decode</button>
 	<div>
 		<label for="outputValue2">JSON:</label>
-		<input id="outputValue2" type="text">
+		<input id="outputValue2" type="text" size=100>
 	</div>
 
 	<script>
-		function encode()
-		{
-			var value = document.getElementById( 'inputValue' ).value;
-			value = JSON.parse( value );
-			var result = SoundSender.valueToString( value );
-			document.getElementById( 'outputValue' ).value = result;
+		function encode() {
+			var value = document.getElementById('inputValue').value;
+			try {
+				value = JSON.parse(value);
+				var result = SoundSender.valueToString(value);
+				document.getElementById('outputValue').value = result;
+			}
+			catch {
+				document.getElementById('outputValue').value = '';
+			}
+			decode();
 		}
-		function decode()
-		{
-			var value = document.getElementById( 'outputValue' ).value;
-			var result = SoundSender.stringToValue( value );
-			document.getElementById( 'outputValue2' ).value = JSON.stringify( result );
+		function decode() {
+			var value = document.getElementById('outputValue').value;
+			var result = SoundSender.stringToValue(value);
+			document.getElementById('outputValue2').value = JSON.stringify(result);
 		}
 	</script>
 </body>

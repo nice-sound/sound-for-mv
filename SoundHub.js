@@ -5,7 +5,7 @@ var SoundHub = /** @class */ (function () {
     SoundHub.createGui = function (name, guiPath, activatorPath) {
         try {
             if (this.debug && this.guiChecks == 0)
-                console.info("Sound GUI initialization: \"".concat(name, "\" container: \"").concat(guiPath, "\" activator: \"").concat(activatorPath, ".\""));
+                console.info("Sound GUI initialization: \"" + name + "\" container: \"" + guiPath + "\" activator: \"" + activatorPath + ".\"");
             this.guiPath = guiPath;
             this.activatorPath = activatorPath;
             this.findAndHandleCommand(this.insertGui.bind(this));
@@ -117,8 +117,7 @@ var SoundHub = /** @class */ (function () {
         },
         started: false,
         closeAudioGui: null,
-        connectAudioGui: null,
-        testAudioGui1: null,
+        connectAudioGui: null, testAudioGui1: null,
         testAudioGui2: null,
         testAudioGui3: null,
         startReceiverGui: null,
