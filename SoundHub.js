@@ -36,13 +36,31 @@ var SoundHub = /** @class */ (function () {
     SoundHub.createLilGui = function (container, name) {
         this.gui = new lil.GUI({ container: container, injectStyles: false });
         var titleGui = this.gui.title("Settings: " + name);
-        var channelsGui = this.gui.add(this.settings, 'channels', { '0,1': '0', '2,3': '2', '4,5': '4' }).name('Output audio channels');
-        this.settings.connectAudioGui = this.gui.add(this.settings, 'connectAudio').name('Connect to audio device');
-        this.settings.testAudioGui1 = this.gui.add(this.settings, 'testAudio1').name('Test audio device at 25%').disable();
-        this.settings.testAudioGui2 = this.gui.add(this.settings, 'testAudio2').name('Test audio device at 50%').disable();
-        this.settings.testAudioGui3 = this.gui.add(this.settings, 'testAudio3').name('Test audio device at 100%').disable();
-        this.settings.startReceiverGui = this.gui.add(this.settings, 'startReceiver').name('Start receiver').disable();
-        var closeGui = this.gui.add(this.settings, 'close').name('Close');
+        var channelsGui = this.gui
+            .add(this.settings, 'channels', { '0,1': '0', '2,3': '2', '4,5': '4' })
+            .name('Output audio channels');
+        this.settings.connectAudioGui = this.gui
+            .add(this.settings, 'connectAudio')
+            .name('Connect to audio device');
+        this.settings.testAudioGui1 = this.gui
+            .add(this.settings, 'testAudio1')
+            .name('Test audio device at 25%')
+            .disable();
+        this.settings.testAudioGui2 = this.gui
+            .add(this.settings, 'testAudio2')
+            .name('Test audio device at 50%')
+            .disable();
+        this.settings.testAudioGui3 = this.gui
+            .add(this.settings, 'testAudio3')
+            .name('Test audio device at 100%')
+            .disable();
+        this.settings.startReceiverGui = this.gui
+            .add(this.settings, 'startReceiver')
+            .name('Start receiver')
+            .disable();
+        var closeGui = this.gui
+            .add(this.settings, 'close')
+            .name('Close');
     };
     SoundHub.createCssRules = function () {
         var css = window.document.styleSheets[0];
@@ -52,12 +70,7 @@ var SoundHub = /** @class */ (function () {
         }
     };
     SoundHub.listenForCommands = function () {
-        var _this = this;
-        var play = function (command) {
-            if (command == "abcd")
-                _this.sound.playSound(0, 1, 0.5, 1);
-        };
-        this.findAndHandleCommand(play);
+        this.findAndHandleCommand(this.playSoundCommnad.bind(this));
         setTimeout(this.listenForCommands.bind(this), 1000);
     };
     SoundHub.findAndHandleCommand = function (handler) {
@@ -76,10 +89,13 @@ var SoundHub = /** @class */ (function () {
             }
         }
     };
-    SoundHub.debug = false;
-    SoundHub.guiChecks = 0;
-    SoundHub.guiCheckMs = 1000;
-    SoundHub.maxGuiChecks = 500;
+    SoundHub.playSoundCommnad = function (command) {
+        var value = SoundSender.stringToValue(command);
+        if (value != null && value.t == 1) {
+            this.sound.playSound(0, 1, 0.5, 1);
+            this.sound.playSound(1, 1, 0.5, 1);
+        }
+    };
     SoundHub.settings = {
         supported: false,
         channels: 0,
@@ -130,5 +146,9 @@ var SoundHub = /** @class */ (function () {
         '.lil-gui button{ width:100%; padding:0.1em; background-color:darkgray; color:lightgray; }',
         '.lil-gui button.disabled{ color:black; color:darkgray; }'
     ];
+    SoundHub.debug = false;
+    SoundHub.guiChecks = 0;
+    SoundHub.guiCheckMs = 1000;
+    SoundHub.maxGuiChecks = 500;
     return SoundHub;
 }());

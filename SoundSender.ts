@@ -3,13 +3,16 @@
 // SoundSender.objectToString({a:1,b:1,c:[1,2,3,4,[1,2],{a:1}]})
 class SoundSender
 {
-	public static setSender( sender: ( string ) => void )
+	public static notificationConnect( notificationId: string )
 	{
-		this.sender = sender;
-	}
-
-	public static connect()
-	{
+		this.sender = function ( command )
+		{
+			var notification = Notification.get( notificationId );
+			if ( notification != null )
+				notification.setTitle( command );
+			else
+				console.error( 'Sound client is missing notification.' );
+		};
 		this.sendCommand( null );
 	}
 
@@ -33,6 +36,22 @@ class SoundSender
 		return commandStr.indexOf( this.commandPrefix ) == 0 ? commandStr.substring( this.commandPrefix.length ) : commandStr;
 	}
 
+	public static valueToString( value: any ): string
+	{
+		if ( Array.isArray( value ) )
+			return this.arrayToString( value );
+		else if ( typeof value == 'number' )
+			return this.numberToString( value );
+		else
+			return this.objectToString( value );
+	}
+
+	public static stringToValue( str: string ): any
+	{
+		var result = this.substringToValue( str, 0 );
+		return result != null ? result[ 0 ] : null;
+	}
+
 	private static sendCommand( command: object | null )
 	{
 		if ( this.sender != null )
@@ -45,16 +64,6 @@ class SoundSender
 				this.sender( this.commandPrefix );
 		else
 			console.error( 'Sound client is missing sender.' );
-	}
-
-	private static valueToString( value: object ): string
-	{
-		if ( Array.isArray( value ) )
-			return this.arrayToString( value );
-		else if ( typeof value == 'number' )
-			return this.numberToString( value );
-		else
-			return this.objectToString( value );
 	}
 
 	private static arrayToString( array: object[] ): string
@@ -101,12 +110,6 @@ class SoundSender
 		for ( var i = str.length - 1; i >= 0; i-- )
 			result += this.encChars[ str.charCodeAt( i ) - this.zeroCc ];
 		return result;
-	}
-
-	private static stringToValue( str: string ): any
-	{
-		var result = this.substringToValue( str, 0 );
-		return result != null ? result[ 0 ] : null;
 	}
 
 	private static substringToValue( str: string, i: number ): [ any, number ] | null
@@ -259,8 +262,8 @@ class SoundSender
 		return parseInt( tmp, this.encChars.length );
 	}
 
-	private static commandPrefix = 'BZZZT';
 	private static sender: ( ( string ) => void ) | null = null;
+	private static commandPrefix = '\u1f4a1';
 	private static zeroCc = '0'.charCodeAt( 0 );
 
 	//*

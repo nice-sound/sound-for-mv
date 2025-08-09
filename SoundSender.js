@@ -4,10 +4,14 @@
 var SoundSender = /** @class */ (function () {
     function SoundSender() {
     }
-    SoundSender.setSender = function (sender) {
-        this.sender = sender;
-    };
-    SoundSender.connect = function () {
+    SoundSender.notificationConnect = function (notificationId) {
+        this.sender = function (command) {
+            var notification = Notification.get(notificationId);
+            if (notification != null)
+                notification.setTitle(command);
+            else
+                console.error('Sound client is missing notification.');
+        };
         this.sendCommand(null);
     };
     SoundSender.play = function (command) {
@@ -22,6 +26,18 @@ var SoundSender = /** @class */ (function () {
     SoundSender.getCommandText = function (commandStr) {
         return commandStr.indexOf(this.commandPrefix) == 0 ? commandStr.substring(this.commandPrefix.length) : commandStr;
     };
+    SoundSender.valueToString = function (value) {
+        if (Array.isArray(value))
+            return this.arrayToString(value);
+        else if (typeof value == 'number')
+            return this.numberToString(value);
+        else
+            return this.objectToString(value);
+    };
+    SoundSender.stringToValue = function (str) {
+        var result = this.substringToValue(str, 0);
+        return result != null ? result[0] : null;
+    };
     SoundSender.sendCommand = function (command) {
         if (this.sender != null)
             if (command != null) {
@@ -32,14 +48,6 @@ var SoundSender = /** @class */ (function () {
                 this.sender(this.commandPrefix);
         else
             console.error('Sound client is missing sender.');
-    };
-    SoundSender.valueToString = function (value) {
-        if (Array.isArray(value))
-            return this.arrayToString(value);
-        else if (typeof value == 'number')
-            return this.numberToString(value);
-        else
-            return this.objectToString(value);
     };
     SoundSender.arrayToString = function (array) {
         var result = this.beginArrayChar;
@@ -75,10 +83,6 @@ var SoundSender = /** @class */ (function () {
         for (var i = str.length - 1; i >= 0; i--)
             result += this.encChars[str.charCodeAt(i) - this.zeroCc];
         return result;
-    };
-    SoundSender.stringToValue = function (str) {
-        var result = this.substringToValue(str, 0);
-        return result != null ? result[0] : null;
     };
     SoundSender.substringToValue = function (str, i) {
         var c = str.charAt(i);
@@ -189,8 +193,8 @@ var SoundSender = /** @class */ (function () {
         }
         return parseInt(tmp, this.encChars.length);
     };
-    SoundSender.commandPrefix = 'BZZZT';
     SoundSender.sender = null;
+    SoundSender.commandPrefix = '\u1f4a1';
     SoundSender.zeroCc = '0'.charCodeAt(0);
     //*
     SoundSender.sepChar = '\u200b';
