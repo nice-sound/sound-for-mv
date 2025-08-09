@@ -71,6 +71,29 @@ class SoundSender
 		return result;
 	}
 
+	private static objectToString( object: object ): string
+	{
+		var result = this.beginObjectChar;
+		var keys = Object.keys( object );
+		for ( var k = 0; k < keys.length; k++ )
+		{
+			var key = keys[ k ];
+			if ( key != null && key.length > 0 )
+			{
+				if ( k > 0 )
+					result += this.sepChar;
+
+				var keyAsNumber = parseInt( key, 36 );
+				result += this.numberToString( keyAsNumber ) + this.sepChar;
+
+				var value = object[ key ];
+				result += this.valueToString( value );
+			}
+		}
+		result += this.endObjectChar;
+		return result;
+	}
+
 	private static numberToString( value: number ): string
 	{
 		var result = "";
@@ -80,75 +103,144 @@ class SoundSender
 		return result;
 	}
 
-	private static objectToString( object: object ): string
+	private static stringToValue( str: string ): any
 	{
-		var result = this.beginObjectChar;
-		var keys = Object.keys( object );
-		for ( var k = 0; k < keys.length; k++ )
-		{
-			if ( k > 0 )
-				result += this.sepChar;
-
-			var key = keys[ k ];
-			var keyAsNumber = parseInt( key, 36 );
-			result += this.numberToString( keyAsNumber ) + this.sepChar;
-
-			var value = object[ key ];
-			result += this.valueToString( value );
-		}
-		result += this.endObjectChar;
-		return result;
+		var result = this.substringToValue( str, 0 );
+		return result != null ? result[ 0 ] : null;
 	}
 
-	private static stringToValue( str: string ): object
+	private static substringToValue( str: string, i: number ): [ any, number ] | null
 	{
-		var result = {};
-		for ( var i = 0; i < str.length; i++ )
+		var c = str.charAt( i );
+		if ( c == this.beginArrayChar )
+		{
+			return this.substringToArray( str, i + 1 );
+		}
+		else if ( c == this.beginObjectChar )
+		{
+			return this.substringToObject( str, i + 1 );
+		}
+		else if ( this.encChars.indexOf( c ) >= 0 )
+		{
+			return this.substringToNumber( str, i );
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	private static substringToArray( str: string, i: number ): [ any[], number ] | null
+	{
+		var result = [];
+		while ( i < str.length )
 		{
 			var c = str.charAt( i );
-			if ( c == this.beginObjectChar )
+			if ( c == this.sepChar )
 			{
+				i++;
 			}
-			else if ( c == this.beginArrayChar )
+			else if ( c == this.endArrayChar )
 			{
-			}
-			else if ( c == this.endObjectChar || c == this.endArrayChar || c == this.sepChar )
-			{
+				i++;
+				break;
 			}
 			else
 			{
-				i = this.stringToKeyValue( str, i, result );
+				var value = this.substringToValue( str, i );
+				if ( value != null )
+				{
+					result.push( value[ 0 ] );
+					i = value[ 1 ];
+				}
+				else
+				{
+					return null;
+				}
 			}
 		}
-		return result;
+		return [ result, i ];
 	}
 
-	private static stringToKeyValue( str: string, i: number, out: object ): number
+	private static substringToObject( str: string, i: number ): [ object, number ] | null
+	{
+		var result = {};
+		while ( i < str.length )
+		{
+			var c = str.charAt( i );
+			if ( c == this.sepChar )
+			{
+				i++;
+			}
+			else if ( c == this.endObjectChar )
+			{
+				i++;
+				break;
+			}
+			else
+			{
+				var value = this.stringToKeyValue( str, i );
+				if ( value != null )
+				{
+					result[ value[ 0 ][ 0 ] ] = value[ 0 ][ 1 ];
+					i = value[ 1 ];
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+		return [ result, i ];
+	}
+
+	private static stringToKeyValue( str: string, i: number ): [ [ string, number ], number ] | null
+	{
+		var key = this.substringToNumber( str, i );
+		if ( key != null )
+		{
+			var keyStr = key[ 0 ].toString( 36 );
+			var value = this.substringToValue( str, key[ 1 ] + 1 );
+			if ( value != null )
+			{
+				return [ [ keyStr, value[ 0 ] ], value[ 1 ] ];
+			}
+			else
+			{
+				return null;
+			}
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+
+
+	private static substringToNumber( str: string, i: number ): [ number, number ] | null
 	{
 		var j = this.findNumberEnd( str, i );
-		var keyAsNumber = this.substringToNumber( str, i, j );
-		var key = keyAsNumber.toString( 36 );
-		j++;
-		var j2 = this.findNumberEnd( str, j );
-		var value = this.substringToNumber( str, j, j2 );
-		out[ key ] = value;
-		return j2;
+		if ( j > i )
+		{
+			var sub = str.substring( i, j );
+			var value = this.stringToNumber( sub );
+			return [ value, j ];
+		}
+		else
+		{
+			return null;
+		}
 	}
 
-	private static findNumberEnd( str: string, i: number )
+	private static findNumberEnd( str: string, i: number ): number
 	{
-		while ( i < str.length && this.encChars.indexOf( str.charAt( i ) ) > -1 )
+		while ( i < str.length && this.encChars.indexOf( str.charAt( i ) ) >= 0 )
 			i++;
 		return i;
 	}
 
-	private static substringToNumber( str: string, i: number, j: number )
-	{
-		var sub = str.substring( i, j );
-		return this.stringToNumber( sub );
-	}
-
-	private static stringToNumber( str: string )
+	private static stringToNumber( str: string ): number | null
 	{
 		var tmp = "";
 		for ( var i = str.length - 1; i >= 0; i-- )
@@ -156,22 +248,36 @@ class SoundSender
 			var c = str.charAt( i );
 			var b = this.encChars.indexOf( c );
 			if ( b >= 0 && b <= 3 )
+			{
 				tmp += String.fromCharCode( b + this.zeroCc );
+			}
 			else
+			{
 				return null;
+			}
 		}
 		return parseInt( tmp, this.encChars.length );
 	}
 
 	private static commandPrefix = 'BZZZT';
 	private static sender: ( ( string ) => void ) | null = null;
-	//private static sepChar = '\u00ad';
-	private static sepChar = ',';
-	//private static encChars = [ '\u200b', '\u200c', '\u200d', '\ufeff' ];
-	private static encChars = [ 'a', 'b', 'c', 'd' ];
-	private static beginObjectChar = '{';
-	private static endObjectChar = '}';
-	private static beginArrayChar = '[';
-	private static endArrayChar = ']';
 	private static zeroCc = '0'.charCodeAt( 0 );
+
+	//*
+	private static sepChar = '\u200b';
+	private static encChars = [ '\u200c', '\u200d', '\u200e', '\u200f' ];
+	private static beginArrayChar = '\u202a';
+	private static beginObjectChar = '\u202c';
+	private static endArrayChar = '\u2066';
+	private static endObjectChar = '\u2069';
+	//*/
+
+	/*
+	private static sepChar = ',';
+	private static encChars = [ 'a', 'b', 'c', 'd' ];
+	private static beginArrayChar = '[';
+	private static beginObjectChar = '{';
+	private static endArrayChar = ']';
+	private static endObjectChar = '}';
+	//*/
 }

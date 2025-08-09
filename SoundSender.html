@@ -22,18 +22,18 @@
 			var value = document.getElementById('inputValue').value;
 			try {
 				value = JSON.parse(value);
-				var result = SoundSender.valueToString(value);
-				document.getElementById('outputValue').value = result;
+				value = SoundSender.valueToString(value);
+				document.getElementById('outputValue').value = `>${value}<`;
+				decode(value);
 			}
 			catch {
 				document.getElementById('outputValue').value = '';
+				document.getElementById('outputValue2').value = '';
 			}
-			decode();
 		}
-		function decode() {
-			var value = document.getElementById('outputValue').value;
-			var result = SoundSender.stringToValue(value);
-			document.getElementById('outputValue2').value = JSON.stringify(result);
+		function decode(value) {
+			value = SoundSender.stringToValue(value);
+			document.getElementById('outputValue2').value = JSON.stringify(value);
 		}
 	</script>
 </body>
