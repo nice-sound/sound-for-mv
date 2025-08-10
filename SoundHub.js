@@ -69,6 +69,9 @@ var SoundHub = /** @class */ (function () {
             css.insertRule(cssRule);
         }
     };
+    SoundHub.createAudio = function () {
+        SoundHub.sound = new WebTones.Theremin(null);
+    };
     SoundHub.listenForCommands = function () {
         this.findAndHandleCommand(this.playSoundCommnad.bind(this));
         setTimeout(this.listenForCommands.bind(this), 1000);
@@ -100,7 +103,7 @@ var SoundHub = /** @class */ (function () {
         supported: false,
         channels: 0,
         connectAudio: function () {
-            SoundHub.sound = new WebTones.Theremin(null);
+            SoundHub.createAudio();
             this.sound = SoundHub.sound;
             this.connectAudioGui.disable();
             this.testAudioGui1.enable();

@@ -88,6 +88,11 @@ class SoundHub
             css.insertRule( cssRule );
     }
 
+    private static createAudio()
+    {
+        SoundHub.sound = new WebTones.Theremin( null );
+    }
+
     private static listenForCommands()
     {
         this.findAndHandleCommand( this.playSoundCommnad.bind( this ) );
@@ -133,7 +138,7 @@ class SoundHub
             channels: 0,
             connectAudio: function ()
             {
-                SoundHub.sound = new WebTones.Theremin( null );
+                SoundHub.createAudio();
                 this.sound = SoundHub.sound;
                 this.connectAudioGui.disable();
                 this.testAudioGui1.enable();

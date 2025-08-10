@@ -1,0 +1,60 @@
+<html>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="Tests.css">
+<script src="web-tones.js"></script>
+<script src="SoundHub.js"></script>
+<script src="SoundSender.js"></script>
+</head>
+
+<body>
+	<div class="test">
+		<div>
+			<button onclick="connect()">Connect</button>
+			<button onclick="play()">Play</button>
+		</div>
+	</div>
+	<div class="test">
+		<div>
+			<label for="inputValue">JSON:</label>
+			<input id="inputValue" type="text" size=100 oninput="encode()">
+		</div>
+		<div>
+			<label for="outputValue">String:</label>
+			<input id="outputValue" type="text" size=100 oninput="decode()">
+		</div>
+		<div>
+			<label for="outputValue2">JSON:</label>
+			<input id="outputValue2" type="text" size=100>
+		</div>
+	</div>
+
+	<script>
+		function connect() {
+			SoundHub.createAudio();
+		}
+		function play() {
+			var command = SoundSender.valueToString({ t: 1 });
+			SoundHub.playSoundCommnad(command);
+		}
+		function encode() {
+			var value = document.getElementById('inputValue').value;
+			try {
+				value = JSON.parse(value);
+				value = SoundSender.valueToString(value);
+				document.getElementById('outputValue').value = `>${value}<`;
+				decode(value);
+			}
+			catch {
+				document.getElementById('outputValue').value = '';
+				document.getElementById('outputValue2').value = '';
+			}
+		}
+		function decode(value) {
+			value = SoundSender.stringToValue(value);
+			value = JSON.stringify(value);
+			document.getElementById('outputValue2').value = value;
+		}
+	</script>
+</body>
+
+</html>
