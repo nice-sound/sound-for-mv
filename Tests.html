@@ -1,6 +1,8 @@
+<!DOCTYPE html>
 <html>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="Tests.css">
+<script src="lil-gui.js"></script>
 <script src="web-tones.js"></script>
 <script src="SoundHub.js"></script>
 <script src="SoundSender.js"></script>
@@ -9,8 +11,10 @@
 <body>
 	<div class="test">
 		<div>
-			<button onclick="connect()">Connect</button>
-			<button onclick="play()">Play</button>
+			<span id="notification"></span>
+			<button onclick="showGui()">Show GUI</button>
+			<button onclick="SoundSender.playMonoPulses( 100, 0 )">PMP0</button>
+			<button onclick="SoundSender.playMonoPulses( 100, 1 )">PMP1</button>
 		</div>
 	</div>
 	<div class="test">
@@ -29,8 +33,9 @@
 	</div>
 
 	<script>
-		function connect() {
-			SoundHub.createAudio();
+		function showGui() {
+			SoundHub.createGui('Test', 'body .test', '#notification');
+			SoundSender.htmlElementConnect('#notification');
 		}
 		function play() {
 			var command = SoundSender.valueToString({ t: 1 });

@@ -10,12 +10,31 @@ var SoundSender = /** @class */ (function () {
             if (notification != null)
                 notification.setTitle(command);
             else
-                console.error('Sound client is missing notification.');
+                console.error('Sound sender. Target notification not found.');
         };
         this.sendCommand(null);
     };
-    SoundSender.play = function (command) {
-        this.sendCommand(command);
+    SoundSender.htmlElementConnect = function (selector) {
+        this.sender = function (command) {
+            var element = document.querySelector(selector);
+            if (element != null && element instanceof HTMLElement)
+                element.innerText = command;
+            else
+                console.error('Sound sender. Target element not found.');
+        };
+        this.sendCommand(null);
+    };
+    SoundSender.playMonoPulses = function (volumePercent, channelIndex) {
+        this.validateReal0100(volumePercent);
+        this.validateInteger010(channelIndex);
+        this.sendCommand({ t: 1, v: volumePercent, c: [channelIndex] });
+    };
+    SoundSender.playStereoPulses = function (volumePercent, channelIndexA, channelIndexB, phasePercent) {
+        this.validateReal0100(volumePercent);
+        this.validateInteger010(channelIndexA);
+        this.validateInteger010(channelIndexB);
+        this.validateReal0100(phasePercent);
+        this.sendCommand({ t: 1, v: volumePercent, c: [channelIndexA, channelIndexB], p: phasePercent });
     };
     SoundSender.stop = function () {
         this.sendCommand(null);
@@ -47,7 +66,7 @@ var SoundSender = /** @class */ (function () {
             else
                 this.sender(this.commandPrefix);
         else
-            console.error('Sound client is missing sender.');
+            console.error('Sound sender. Sender missing.');
     };
     SoundSender.arrayToString = function (array) {
         var result = this.beginArrayChar;
@@ -193,8 +212,16 @@ var SoundSender = /** @class */ (function () {
         }
         return parseInt(tmp, this.encChars.length);
     };
+    SoundSender.validateReal0100 = function (value) {
+        if (value < 0 || value > 100)
+            throw "Percent out of range: ".concat(value, ".");
+    };
+    SoundSender.validateInteger010 = function (value) {
+        if (value < 0 || value > 10 || value != Math.floor(value))
+            throw "Channel out of range: ".concat(value, ".");
+    };
     SoundSender.sender = null;
-    SoundSender.commandPrefix = '\u1f4a1';
+    SoundSender.commandPrefix = "\uD83D\uDCA1";
     SoundSender.zeroCc = '0'.charCodeAt(0);
     //*
     SoundSender.sepChar = '\u200b';

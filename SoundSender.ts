@@ -11,14 +11,38 @@ class SoundSender
 			if ( notification != null )
 				notification.setTitle( command );
 			else
-				console.error( 'Sound client is missing notification.' );
+				console.error( 'Sound sender. Target notification not found.' );
 		};
 		this.sendCommand( null );
 	}
 
-	public static play( command: object )
+	public static htmlElementConnect( selector: string )
 	{
-		this.sendCommand( command );
+		this.sender = function ( command )
+		{
+			var element = document.querySelector( selector );
+			if ( element != null && element instanceof HTMLElement )
+				element.innerText = command;
+			else
+				console.error( 'Sound sender. Target element not found.' );
+		};
+		this.sendCommand( null );
+	}
+
+	public static playMonoPulses( volumePercent: number, channelIndex: number )
+	{
+		this.validateReal0100( volumePercent );
+		this.validateInteger010( channelIndex );
+		this.sendCommand( { t: 1, v: volumePercent, c: [ channelIndex ] } );
+	}
+
+	public static playStereoPulses( volumePercent: number, channelIndexA: number, channelIndexB: number, phasePercent: number )
+	{
+		this.validateReal0100( volumePercent );
+		this.validateInteger010( channelIndexA );
+		this.validateInteger010( channelIndexB );
+		this.validateReal0100( phasePercent );
+		this.sendCommand( { t: 1, v: volumePercent, c: [ channelIndexA, channelIndexB ], p: phasePercent } );
 	}
 
 	public static stop()
@@ -35,6 +59,7 @@ class SoundSender
 	{
 		return commandStr.indexOf( this.commandPrefix ) == 0 ? commandStr.substring( this.commandPrefix.length ) : commandStr;
 	}
+
 
 	public static valueToString( value: any ): string
 	{
@@ -63,7 +88,7 @@ class SoundSender
 			else
 				this.sender( this.commandPrefix );
 		else
-			console.error( 'Sound client is missing sender.' );
+			console.error( 'Sound sender. Sender missing.' );
 	}
 
 	private static arrayToString( array: object[] ): string
@@ -219,8 +244,6 @@ class SoundSender
 		}
 	}
 
-
-
 	private static substringToNumber( str: string, i: number ): [ number, number ] | null
 	{
 		var j = this.findNumberEnd( str, i );
@@ -262,8 +285,20 @@ class SoundSender
 		return parseInt( tmp, this.encChars.length );
 	}
 
+	public static validateReal0100( value: number )
+	{
+		if ( value < 0 || value > 100 )
+			throw `Percent out of range: ${ value }.`;
+	}
+
+	public static validateInteger010( value: number )
+	{
+		if ( value < 0 || value > 10 || value != Math.floor( value ) )
+			throw `Channel out of range: ${ value }.`;
+	}
+
 	private static sender: ( ( string ) => void ) | null = null;
-	private static commandPrefix = '\u1f4a1';
+	private static commandPrefix = '\u{1f4a1}';
 	private static zeroCc = '0'.charCodeAt( 0 );
 
 	//*

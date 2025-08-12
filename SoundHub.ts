@@ -2,7 +2,7 @@
 
 class SoundHub
 {
-    public static createGui( name, guiPath, activatorPath )
+    public static createGui( name: string, guiPath: string, activatorPath: string )
     {
         try
         {
@@ -125,10 +125,21 @@ class SoundHub
     private static playSoundCommnad( command )
     {
         var value = SoundSender.stringToValue( command );
-        if ( value != null && value.t == 1 )
+        if ( value != null )
         {
-            this.sound.playSound( 0, 1, 0.5, 1 );
-            this.sound.playSound( 1, 1, 0.5, 1 );
+            if ( value.t == 0 )
+            {
+                this.sound.stop();
+            }
+            else if ( value.t == 1 )
+            {
+                SoundSender.validateReal0100( value.v );
+                for ( let channelIndex of value.c )
+                {
+                    SoundSender.validateInteger010( channelIndex );
+                    this.sound.playSound( channelIndex, value.v / 100, 0.5, 1 );
+                }
+            }
         }
     }
 
