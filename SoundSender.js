@@ -36,8 +36,10 @@ var SoundSender = /** @class */ (function () {
         this.validateReal0100(phasePercent);
         this.sendCommand({ t: 1, v: volumePercent, c: [channelIndexA, channelIndexB], p: phasePercent });
     };
-    SoundSender.stop = function () {
-        this.sendCommand(null);
+    SoundSender.pauseAll = function () {
+    };
+    SoundSender.stopAll = function () {
+        this.sendCommand({ t: 0 });
     };
     SoundSender.isCommand = function (commandStr) {
         return commandStr.substring(0, this.commandPrefix.length) == this.commandPrefix;

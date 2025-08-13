@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "allowJs": true,
+        "checkJs": false,
         "target": "ES5",
         "module": "None",
     },

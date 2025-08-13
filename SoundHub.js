@@ -73,7 +73,7 @@ var SoundHub = /** @class */ (function () {
         SoundHub.sound = new WebTones.Theremin(null);
     };
     SoundHub.listenForCommands = function () {
-        this.findAndHandleCommand(this.playSoundCommnad.bind(this));
+        this.findAndHandleCommand(this.handleSoundCommnad.bind(this));
         setTimeout(this.listenForCommands.bind(this), 1000);
     };
     SoundHub.findAndHandleCommand = function (handler) {
@@ -92,18 +92,19 @@ var SoundHub = /** @class */ (function () {
             }
         }
     };
-    SoundHub.playSoundCommnad = function (command) {
+    SoundHub.handleSoundCommnad = function (command) {
         var value = SoundSender.stringToValue(command);
         if (value != null) {
             if (value.t == 0) {
-                this.sound.stop();
+                this.sound.stopAudio();
             }
             else if (value.t == 1) {
-                SoundSender.validateReal0100(value.v);
                 for (var _i = 0, _a = value.c; _i < _a.length; _i++) {
-                    var channelIndex = _a[_i];
-                    SoundSender.validateInteger010(channelIndex);
-                    this.sound.playSound(channelIndex, value.v / 100, 0.5, 1);
+                    var channel = _a[_i];
+                    SoundSender.validateInteger010(channel);
+                    SoundSender.validateReal0100(value.v);
+                    this.sound.playFrequencyGenerator(channel, new WebTones.SignalGenerators.Const(700));
+                    this.sound.playVolumeGenerator(channel, new WebTones.SignalGenerators.SinAbs(value.v / 100, 1));
                 }
             }
         }

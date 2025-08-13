@@ -45,9 +45,13 @@ class SoundSender
 		this.sendCommand( { t: 1, v: volumePercent, c: [ channelIndexA, channelIndexB ], p: phasePercent } );
 	}
 
-	public static stop()
+	public static pauseAll()
 	{
-		this.sendCommand( null );
+	}
+
+	public static stopAll()
+	{
+		this.sendCommand( { t: 0 } );
 	}
 
 	public static isCommand( commandStr: string ): boolean

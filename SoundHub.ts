@@ -95,7 +95,7 @@ class SoundHub
 
     private static listenForCommands()
     {
-        this.findAndHandleCommand( this.playSoundCommnad.bind( this ) );
+        this.findAndHandleCommand( this.handleSoundCommnad.bind( this ) );
         setTimeout( this.listenForCommands.bind( this ), 1000 );
     }
 
@@ -122,22 +122,23 @@ class SoundHub
         }
     }
 
-    private static playSoundCommnad( command )
+    private static handleSoundCommnad( command: string )
     {
         var value = SoundSender.stringToValue( command );
         if ( value != null )
         {
             if ( value.t == 0 )
             {
-                this.sound.stop();
+                this.sound.stopAudio();
             }
             else if ( value.t == 1 )
             {
-                SoundSender.validateReal0100( value.v );
-                for ( let channelIndex of value.c )
+                for ( let channel of value.c )
                 {
-                    SoundSender.validateInteger010( channelIndex );
-                    this.sound.playSound( channelIndex, value.v / 100, 0.5, 1 );
+                    SoundSender.validateInteger010( channel );
+                    SoundSender.validateReal0100( value.v );
+                    this.sound.playFrequencyGenerator( channel, new WebTones.SignalGenerators.Const( 700 ) );
+                    this.sound.playVolumeGenerator( channel, new WebTones.SignalGenerators.SinAbs( value.v / 100, 1 ) );
                 }
             }
         }
