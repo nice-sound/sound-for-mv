@@ -39,11 +39,11 @@ var SoundSender = /** @class */ (function () {
     SoundSender.stop = function () {
         this.sendCommand(null);
     };
-    SoundSender.isCommand = function (commandStr) {
-        return commandStr.substring(0, this.commandPrefix.length) == this.commandPrefix;
-    };
     SoundSender.getCommandText = function (commandStr) {
-        return commandStr.indexOf(this.commandPrefix) == 0 ? commandStr.substring(this.commandPrefix.length) : commandStr;
+        if (commandStr.substring(0, this.commandPrefix.length) == this.commandPrefix)
+            return commandStr.indexOf(this.commandPrefix) == 0 ? commandStr.substring(this.commandPrefix.length) : commandStr;
+        else
+            return null;
     };
     SoundSender.valueToString = function (value) {
         if (Array.isArray(value))
@@ -214,11 +214,11 @@ var SoundSender = /** @class */ (function () {
     };
     SoundSender.validateReal0100 = function (value) {
         if (value < 0 || value > 100)
-            throw "Percent out of range: ".concat(value, ".");
+            throw "Percent out of range: " + value + ".";
     };
     SoundSender.validateInteger010 = function (value) {
         if (value < 0 || value > 10 || value != Math.floor(value))
-            throw "Channel out of range: ".concat(value, ".");
+            throw "Channel out of range: " + value + ".";
     };
     SoundSender.sender = null;
     SoundSender.commandPrefix = "\uD83D\uDCA1";

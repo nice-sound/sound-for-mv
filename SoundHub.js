@@ -5,13 +5,13 @@ var SoundHub = /** @class */ (function () {
     SoundHub.createGui = function (name, guiPath, activatorPath) {
         try {
             if (this.debug && this.guiChecks == 0)
-                console.info("Sound GUI initialization: \"".concat(name, "\" container: \"").concat(guiPath, "\" activator: \"").concat(activatorPath, ".\""));
+                console.info("Sound GUI initialization: \"" + name + "\" container: \"" + guiPath + "\" activator: \"" + activatorPath + ".\"");
             this.guiPath = guiPath;
             this.activatorPath = activatorPath;
             this.findAndHandleCommand(this.insertGui.bind(this));
             this.guiChecks++;
             if (this.gui == null && this.guiChecks < this.maxGuiChecks)
-                setTimeout(this.createGui.bind(this, name, activatorPath, guiPath), this.guiCheckMs);
+                setTimeout(this.createGui.bind(this, name, activatorPath, guiPath), this.monitorMs);
             else if (this.debug)
                 console.info('Sound GUI not connected.');
         }
@@ -74,7 +74,7 @@ var SoundHub = /** @class */ (function () {
     };
     SoundHub.listenForCommands = function () {
         this.findAndHandleCommand(this.playSoundCommnad.bind(this));
-        setTimeout(this.listenForCommands.bind(this), 1000);
+        setTimeout(this.listenForCommands.bind(this), this.monitorMs);
     };
     SoundHub.findAndHandleCommand = function (handler) {
         var activators = window.document.querySelectorAll(this.activatorPath);
@@ -85,9 +85,12 @@ var SoundHub = /** @class */ (function () {
                 if (activators.item(a) instanceof HTMLElement) {
                     if (this.debug)
                         console.debug('Sound HTMLElement');
-                    var h = activators.item(a);
-                    if (SoundSender.isCommand(h.textContent))
-                        handler(SoundSender.getCommandText(h.textContent));
+                    var element = activators.item(a);
+                    var command = SoundSender.getCommandText(element.textContent);
+                    if (command != null) {
+                        element.textContent = null;
+                        handler(command);
+                    }
                 }
             }
         }
@@ -95,6 +98,7 @@ var SoundHub = /** @class */ (function () {
     SoundHub.playSoundCommnad = function (command) {
         var value = SoundSender.stringToValue(command);
         if (value != null) {
+            console.debug(JSON.stringify(value));
             if (value.t == 0) {
                 this.sound.stop();
             }
@@ -160,7 +164,7 @@ var SoundHub = /** @class */ (function () {
     ];
     SoundHub.debug = false;
     SoundHub.guiChecks = 0;
-    SoundHub.guiCheckMs = 1000;
     SoundHub.maxGuiChecks = 500;
+    SoundHub.monitorMs = 100;
     return SoundHub;
 }());

@@ -50,14 +50,12 @@ class SoundSender
 		this.sendCommand( null );
 	}
 
-	public static isCommand( commandStr: string ): boolean
+	public static getCommandText( commandStr: string ): string | null
 	{
-		return commandStr.substring( 0, this.commandPrefix.length ) == this.commandPrefix;
-	}
-
-	public static getCommandText( commandStr: string ): string
-	{
-		return commandStr.indexOf( this.commandPrefix ) == 0 ? commandStr.substring( this.commandPrefix.length ) : commandStr;
+		if ( commandStr.substring( 0, this.commandPrefix.length ) == this.commandPrefix )
+			return commandStr.indexOf( this.commandPrefix ) == 0 ? commandStr.substring( this.commandPrefix.length ) : commandStr;
+		else
+			return null;
 	}
 
 
