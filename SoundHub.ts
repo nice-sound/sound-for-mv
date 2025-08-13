@@ -15,7 +15,7 @@ class SoundHub
 
             this.guiChecks++;
             if ( this.gui == null && this.guiChecks < this.maxGuiChecks )
-                setTimeout( this.createGui.bind( this, name, activatorPath, guiPath ), this.guiCheckMs );
+                setTimeout( this.createGui.bind( this, name, activatorPath, guiPath ), this.monitorMs );
             else if ( this.debug )
                 console.info( 'Sound GUI not connected.' );
         }
@@ -96,7 +96,7 @@ class SoundHub
     private static listenForCommands()
     {
         this.findAndHandleCommand( this.handleSoundCommnad.bind( this ) );
-        setTimeout( this.listenForCommands.bind( this ), 1000 );
+        setTimeout( this.listenForCommands.bind( this ), this.monitorMs );
     }
 
     private static findAndHandleCommand( handler: ( string ) => void )
@@ -114,12 +114,16 @@ class SoundHub
                     if ( this.debug )
                         console.debug( 'Sound HTMLElement' );
 
-                    var h = activators.item( a ) as HTMLElement;
-                    if ( SoundSender.isCommand( h.textContent ) )
-                        handler( SoundSender.getCommandText( h.textContent ) );
+                    var element = activators.item( a ) as HTMLElement;
+                    var command = SoundSender.getCommandText( element.textContent );
+                    if ( command != null )
+                    {
+                        element.textContent = null;
+                        handler( command );
                 }
             }
         }
+    }
     }
 
     private static handleSoundCommnad( command: string )
@@ -127,6 +131,7 @@ class SoundHub
         var value = SoundSender.stringToValue( command );
         if ( value != null )
         {
+            console.debug( JSON.stringify( value ) );
             if ( value.t == 0 )
             {
                 this.sound.stopAudio();
@@ -205,8 +210,8 @@ class SoundHub
 
     private static debug = false;
     private static guiChecks = 0;
-    private static guiCheckMs = 1000;
     private static maxGuiChecks = 500;
+    private static monitorMs = 100;
     private static gui;
     private static sound;
     private static guiPath;
