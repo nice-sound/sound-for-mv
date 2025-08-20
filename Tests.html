@@ -15,6 +15,8 @@
 			<button onclick="showGui()">Show GUI</button>
 			<button onclick="SoundSender.playMonoPulses( 100, 0 )">PMP0</button>
 			<button onclick="SoundSender.playMonoPulses( 100, 1 )">PMP1</button>
+			<button onclick="SoundSender.playStereoPulses( 100, 0, 1, 25 )">PSP</button>
+			<button onclick="SoundSender.playStereoRandomPulses( 100, 0, 1, 25 )">PSPR</button>
 			<br />
 			<button onclick="SoundSender.pauseAll()">Pause All</button>
 			<button onclick="SoundSender.stopAll()">Stop All</button>
@@ -41,14 +43,14 @@
 			SoundSender.htmlElementConnect('#notification');
 		}
 		function play() {
-			var command = SoundSender.valueToString({ t: 1 });
+			var command = SoundSender.valueToEncode({ t: 1 });
 			SoundHub.playSoundCommnad(command);
 		}
 		function encode() {
 			var value = document.getElementById('inputValue').value;
 			try {
 				value = JSON.parse(value);
-				value = SoundSender.valueToString(value);
+				value = SoundSender.valueToEncode(value);
 				document.getElementById('outputValue').value = `>${value}<`;
 				decode(value);
 			}
@@ -58,7 +60,7 @@
 			}
 		}
 		function decode(value) {
-			value = SoundSender.stringToValue(value);
+			value = SoundSender.encodeToValue(value);
 			value = JSON.stringify(value);
 			document.getElementById('outputValue2').value = value;
 		}

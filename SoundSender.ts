@@ -5,27 +5,13 @@ class SoundSender
 {
 	public static notificationConnect( notificationId: string )
 	{
-		this.sender = function ( command )
-		{
-			var notification = Notification.get( notificationId );
-			if ( notification != null )
-				notification.setTitle( command );
-			else
-				console.error( 'Sound sender. Target notification not found.' );
-		};
+		this.sender = this.sendToNotification.bind( this, notificationId );
 		this.sendCommand( null );
 	}
 
 	public static htmlElementConnect( selector: string )
 	{
-		this.sender = function ( command )
-		{
-			var element = document.querySelector( selector );
-			if ( element != null && element instanceof HTMLElement )
-				element.innerText = command;
-			else
-				console.error( 'Sound sender. Target element not found.' );
-		};
+		this.sender = this.sendToHtmlElement.bind( this, selector );
 		this.sendCommand( null );
 	}
 
@@ -33,7 +19,7 @@ class SoundSender
 	{
 		this.validateReal0100( volumePercent );
 		this.validateInteger010( channelIndex );
-		this.sendCommand( { t: 1, v: volumePercent, c: [ channelIndex ] } );
+		this.sendCommand( { t: 'p', v: volumePercent, c: [ channelIndex ] } );
 	}
 
 	public static playStereoPulses( volumePercent: number, channelIndexA: number, channelIndexB: number, phasePercent: number )
@@ -42,7 +28,16 @@ class SoundSender
 		this.validateInteger010( channelIndexA );
 		this.validateInteger010( channelIndexB );
 		this.validateReal0100( phasePercent );
-		this.sendCommand( { t: 1, v: volumePercent, c: [ channelIndexA, channelIndexB ], p: phasePercent } );
+		this.sendCommand( { t: 'p', v: volumePercent, c: [ channelIndexA, channelIndexB ], p: phasePercent } );
+	}
+
+	public static playStereoRandomPulses( volumePercent: number, channelIndexA: number, channelIndexB: number, phasePercent: number )
+	{
+		this.validateReal0100( volumePercent );
+		this.validateInteger010( channelIndexA );
+		this.validateInteger010( channelIndexB );
+		this.validateReal0100( phasePercent );
+		this.sendCommand( { t: 'pr', v: volumePercent, c: [ channelIndexA, channelIndexB ], p: phasePercent } );
 	}
 
 	public static pauseAll()
@@ -51,7 +46,7 @@ class SoundSender
 
 	public static stopAll()
 	{
-		this.sendCommand( { t: 0 } );
+		this.sendCommand( { t: 's' } );
 	}
 
 	public static getCommandText( commandStr: string ): string | null
@@ -63,19 +58,21 @@ class SoundSender
 	}
 
 
-	public static valueToString( value: any ): string
+	public static valueToEncode( value: any ): string
 	{
 		if ( Array.isArray( value ) )
-			return this.arrayToString( value );
+			return this.arrayToEncode( value );
+		else if ( typeof value == 'string' )
+			return this.stringToEncode( value );
 		else if ( typeof value == 'number' )
-			return this.numberToString( value );
+			return this.numberToEncode( value );
 		else
-			return this.objectToString( value );
+			return this.objectToEncode( value );
 	}
 
-	public static stringToValue( str: string ): any
+	public static encodeToValue( str: string ): any
 	{
-		var result = this.substringToValue( str, 0 );
+		var result = this.subEncodeToValue( str, 0 );
 		return result != null ? result[ 0 ] : null;
 	}
 
@@ -84,7 +81,7 @@ class SoundSender
 		if ( this.sender != null )
 			if ( command != null )
 			{
-				var commandStr = this.valueToString( command );
+				var commandStr = this.valueToEncode( command );
 				this.sender( this.commandPrefix + commandStr );
 			}
 			else
@@ -93,7 +90,25 @@ class SoundSender
 			console.error( 'Sound sender. Sender missing.' );
 	}
 
-	private static arrayToString( array: object[] ): string
+	private static sendToNotification( notificationId: string, command: string )
+	{
+		var notification = Notification.get( notificationId );
+		if ( notification != null )
+			notification.setTitle( command );
+		else
+			console.error( 'Sound sender. Target notification not found.' );
+	}
+
+	private static sendToHtmlElement( selector: string, command: string )
+	{
+		var element = document.querySelector( selector );
+		if ( element != null && element instanceof HTMLElement )
+			element.innerText = command;
+		else
+			console.error( 'Sound sender. Target element not found.' );
+	}
+
+	private static arrayToEncode( array: object[] ): string
 	{
 		var result = this.beginArrayChar;
 		for ( var i = 0; i < array.length; i++ )
@@ -101,13 +116,13 @@ class SoundSender
 			if ( i > 0 )
 				result += this.sepChar;
 			var value = array[ i ];
-			result += this.valueToString( value );
+			result += this.valueToEncode( value );
 		}
 		result += this.endArrayChar;
 		return result;
 	}
 
-	private static objectToString( object: object ): string
+	private static objectToEncode( object: object ): string
 	{
 		var result = this.beginObjectChar;
 		var keys = Object.keys( object );
@@ -120,17 +135,25 @@ class SoundSender
 					result += this.sepChar;
 
 				var keyAsNumber = parseInt( key, 36 );
-				result += this.numberToString( keyAsNumber ) + this.sepChar;
+				result += this.numberToEncode( keyAsNumber );
+
+				result += this.sepChar;
 
 				var value = object[ key ];
-				result += this.valueToString( value );
+				result += this.valueToEncode( value );
 			}
 		}
 		result += this.endObjectChar;
 		return result;
 	}
 
-	private static numberToString( value: number ): string
+	private static stringToEncode( value: string ): string
+	{
+		var valueAsNumber = parseInt( value, 36 );
+		return this.stringChar + this.numberToEncode( valueAsNumber );
+	}
+
+	private static numberToEncode( value: number ): string
 	{
 		var result = "";
 		var str = Math.floor( value ).toString( this.encChars.length );
@@ -139,28 +162,22 @@ class SoundSender
 		return result;
 	}
 
-	private static substringToValue( str: string, i: number ): [ any, number ] | null
+	private static subEncodeToValue( str: string, i: number ): [ any, number ] | null
 	{
 		var c = str.charAt( i );
 		if ( c == this.beginArrayChar )
-		{
-			return this.substringToArray( str, i + 1 );
-		}
+			return this.subEncodeToArray( str, i + 1 );
 		else if ( c == this.beginObjectChar )
-		{
-			return this.substringToObject( str, i + 1 );
-		}
+			return this.subEncodeToObject( str, i + 1 );
+		else if ( c == this.stringChar )
+			return this.subEncodeToString( str, i + 1 );
 		else if ( this.encChars.indexOf( c ) >= 0 )
-		{
-			return this.substringToNumber( str, i );
-		}
+			return this.subEncodeToNumber( str, i );
 		else
-		{
 			return null;
-		}
 	}
 
-	private static substringToArray( str: string, i: number ): [ any[], number ] | null
+	private static subEncodeToArray( str: string, i: number ): [ any[], number ] | null
 	{
 		var result = [];
 		while ( i < str.length )
@@ -177,22 +194,20 @@ class SoundSender
 			}
 			else
 			{
-				var value = this.substringToValue( str, i );
+				var value = this.subEncodeToValue( str, i );
 				if ( value != null )
 				{
 					result.push( value[ 0 ] );
 					i = value[ 1 ];
 				}
 				else
-				{
 					return null;
-				}
 			}
 		}
 		return [ result, i ];
 	}
 
-	private static substringToObject( str: string, i: number ): [ object, number ] | null
+	private static subEncodeToObject( str: string, i: number ): [ object, number ] | null
 	{
 		var result = {};
 		while ( i < str.length )
@@ -209,66 +224,55 @@ class SoundSender
 			}
 			else
 			{
-				var value = this.stringToKeyValue( str, i );
+				var value = this.subEncodeToKeyValue( str, i );
 				if ( value != null )
 				{
 					result[ value[ 0 ][ 0 ] ] = value[ 0 ][ 1 ];
 					i = value[ 1 ];
 				}
 				else
-				{
 					return null;
-				}
 			}
 		}
 		return [ result, i ];
 	}
 
-	private static stringToKeyValue( str: string, i: number ): [ [ string, number ], number ] | null
+	private static subEncodeToKeyValue( str: string, i: number ): [ [ string, number ], number ] | null
 	{
-		var key = this.substringToNumber( str, i );
+		var key = this.subEncodeToNumber( str, i );
 		if ( key != null )
 		{
 			var keyStr = key[ 0 ].toString( 36 );
-			var value = this.substringToValue( str, key[ 1 ] + 1 );
+			var value = this.subEncodeToValue( str, key[ 1 ] + 1 );
 			if ( value != null )
-			{
 				return [ [ keyStr, value[ 0 ] ], value[ 1 ] ];
-			}
 			else
-			{
 				return null;
-			}
 		}
 		else
-		{
 			return null;
-		}
 	}
 
-	private static substringToNumber( str: string, i: number ): [ number, number ] | null
+	private static subEncodeToString( str: string, i: number ): [ string, number ] | null
+	{
+		let value = this.subEncodeToNumber( str, i );
+		return [ value[ 0 ].toString( 36 ), value[ 1 ] ];
+	}
+
+	private static subEncodeToNumber( str: string, i: number ): [ number, number ] | null
 	{
 		var j = this.findNumberEnd( str, i );
 		if ( j > i )
 		{
 			var sub = str.substring( i, j );
-			var value = this.stringToNumber( sub );
+			var value = this.eoncodeToNumber( sub );
 			return [ value, j ];
 		}
 		else
-		{
 			return null;
-		}
 	}
 
-	private static findNumberEnd( str: string, i: number ): number
-	{
-		while ( i < str.length && this.encChars.indexOf( str.charAt( i ) ) >= 0 )
-			i++;
-		return i;
-	}
-
-	private static stringToNumber( str: string ): number | null
+	private static eoncodeToNumber( str: string ): number | null
 	{
 		var tmp = "";
 		for ( var i = str.length - 1; i >= 0; i-- )
@@ -276,15 +280,18 @@ class SoundSender
 			var c = str.charAt( i );
 			var b = this.encChars.indexOf( c );
 			if ( b >= 0 && b <= 3 )
-			{
 				tmp += String.fromCharCode( b + this.zeroCc );
-			}
 			else
-			{
 				return null;
-			}
 		}
 		return parseInt( tmp, this.encChars.length );
+	}
+
+	private static findNumberEnd( str: string, i: number ): number
+	{
+		while ( i < str.length && this.encChars.indexOf( str.charAt( i ) ) >= 0 )
+			i++;
+		return i;
 	}
 
 	public static validateReal0100( value: number )
@@ -304,12 +311,15 @@ class SoundSender
 	private static zeroCc = '0'.charCodeAt( 0 );
 
 	//*
-	private static sepChar = '\u200b';
+	private static stringChar = '\u2061'; // Function Application
+	private static sepChar = '\u200b'; // Zero-Width Space
 	private static encChars = [ '\u200c', '\u200d', '\u200e', '\u200f' ];
-	private static beginArrayChar = '\u202a';
-	private static beginObjectChar = '\u202c';
-	private static endArrayChar = '\u2066';
-	private static endObjectChar = '\u2069';
+
+	private static beginArrayChar = '\u202a'; // Left-to-Right Embedding
+	private static endArrayChar = '\u202c'; // Pop Directional Formatting
+
+	private static beginObjectChar = '\u2066'; // Left-to-Right Isolate
+	private static endObjectChar = '\u2069'; // Pop Directional Isolate
 	//*/
 
 	/*

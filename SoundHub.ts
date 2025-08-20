@@ -120,30 +120,40 @@ class SoundHub
                     {
                         element.textContent = null;
                         handler( command );
+                    }
                 }
             }
         }
     }
-    }
 
     private static handleSoundCommnad( command: string )
     {
-        var value = SoundSender.stringToValue( command );
+        var value = SoundSender.encodeToValue( command );
         if ( value != null )
         {
             console.debug( JSON.stringify( value ) );
-            if ( value.t == 0 )
+            if ( value.t == 's' )
             {
                 this.sound.stopAudio();
             }
-            else if ( value.t == 1 )
+            else if ( value.t == 'p' )
             {
                 for ( let channel of value.c )
                 {
                     SoundSender.validateInteger010( channel );
                     SoundSender.validateReal0100( value.v );
-                    this.sound.playFrequencyGenerator( channel, new WebTones.SignalGenerators.Const( 700 ) );
+                    this.sound.playFrequencyGenerator( channel, new WebTones.SignalGenerators.Const( this.frequencyHz ) );
                     this.sound.playVolumeGenerator( channel, new WebTones.SignalGenerators.SinAbs( value.v / 100, 1 ) );
+                }
+            }
+            else if ( value.t == 'pr' )
+            {
+                for ( let channel of value.c )
+                {
+                    SoundSender.validateInteger010( channel );
+                    SoundSender.validateReal0100( value.v );
+                    this.sound.playFrequencyGenerator( channel, new WebTones.SignalGenerators.Const( this.frequencyHz ) );
+                    this.sound.playVolumeGenerator( channel, new WebTones.SignalGenerators.SinAbsValueRndWaveRnd( value.v / 100, 0.5, 1, 0.1 ) );
                 }
             }
         }
@@ -212,6 +222,7 @@ class SoundHub
     private static guiChecks = 0;
     private static maxGuiChecks = 500;
     private static monitorMs = 100;
+    private static frequencyHz = 700;
     private static gui;
     private static sound;
     private static guiPath;
